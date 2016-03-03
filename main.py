@@ -42,13 +42,14 @@ drawables.append(body)
 body.mass = 1
 body.angularVelocity = 1
 
+tempPosList = []
+tempStartPos = (0,0)
+
 print(board)
 
 print window.height
 print window.width
 
-tempPosList = []
-tempStartPos = (0,0)
 
 def update(dt):
   global board
@@ -88,7 +89,7 @@ def on_mouse_press(x, y, button, modifiers):
       print tempPosList
       drawables.append(newBody)
       tempStartPos = (0,0)
-      tempPosList = []
+      tempPosList = []  
   elif button==4:
     if tempStartPos == (0,0):
       tempStartPos = mPos
