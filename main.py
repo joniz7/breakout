@@ -1,6 +1,7 @@
 import pyglet
 import random
 from pyglet import clock
+from pyglet.window import key
 from Box2D import *
 from itertools import chain
 from view_helpers import *
@@ -8,6 +9,8 @@ from view_helpers import *
 # Setup the world and the window
 world = b2World(gravity = (0,-10), doSleep=True)
 window = pyglet.window.Window()
+keys = key.KeyStateHandler()
+window.push_handlers(keys)
 clock.set_fps_limit(60)
 
 drawables = []
@@ -16,27 +19,52 @@ drawables = []
 timeStep = 1.0/60
 vel_iters, pos_iters = 10, 10
 
-# Define the ground
-groundBody = world.CreateStaticBody(
-    position=(15,11),
-    shapes=b2PolygonShape(box=(10,3)),
+roof = world.CreateStaticBody(
+  position=pixelToMeter(0, window.height),
+  shapes=b2PolygonShape(box=pixelToMeter(window.width/2, 1))
   )
+
+board = world.CreateKinematicBody(
+    position=(15,11),
+    shapes=b2PolygonShape(box=(10,3))
+  )
+board.gravityScale = 0
+board.mass = 100
 
 # Define dynamic body
 body = world.CreateDynamicBody(
     position=(25.5,30)
   )
-box = body.CreatePolygonFixture(box=(1,1), density=1, friction=0.3)
+box = body.CreatePolygonFixture(box=(1,1), density=1, friction=0.3, restitution=1)
 drawables.append(body)
 
-print(groundBody.position)
+body.mass = 1
+body.angularVelocity = 1
+
+print(board)
+
+print window.height
+print window.width
 
 tempPosList = []
 tempStartPos = (0,0)
 
 def update(dt):
+  global board
   world.Step(dt, vel_iters, pos_iters)
   world.ClearForces()
+
+  if keys[key.LEFT]:
+    board.linearVelocity = (-10, 0)
+  elif keys[key.RIGHT]:
+    board.linearVelocity = (10,0)
+  elif keys[key.Z]:
+    board.angularVelocity = 10
+  elif keys[key.X]:
+    board.angularVelocity = -10
+  else:
+    board.linearVelocity = (0,0)
+    board.angularVelocity = 0
 
 @window.event
 def on_mouse_press(x, y, button, modifiers):
@@ -73,8 +101,8 @@ def on_draw():
 
   #print groundBody.position
 
-  for fixture in groundBody.fixtures:
-    vertices = vertListToDrawTuple(fixture.shape.vertices, groundBody.position, groundBody.angle)
+  for fixture in board.fixtures:
+    vertices = vertListToDrawTuple(fixture.shape.vertices, board.position, board.angle)
     pyglet.graphics.draw(len(vertices)/2, pyglet.gl.GL_POLYGON, ('v2f', vertices))
 
   for drawable in drawables:
