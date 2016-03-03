@@ -14,19 +14,20 @@ window.push_handlers(keys)
 clock.set_fps_limit(60)
 
 drawables = []
+drawBatch = pyglet.graphics.Batch()
 
 # Setup some physics parameters
 timeStep = 1.0/60
 vel_iters, pos_iters = 10, 10
 
 roof = world.CreateStaticBody(
-  position=pixelToMeter(0, window.height),
+  position=pixelToMeter(window.width/2, window.height),
   shapes=b2PolygonShape(box=pixelToMeter(window.width/2, 1))
   )
 
 board = world.CreateKinematicBody(
     position=(15,11),
-    shapes=b2PolygonShape(box=(10,3))
+    shapes=b2PolygonShape(box=(10,1))
   )
 board.gravityScale = 0
 board.mass = 100
@@ -55,15 +56,16 @@ def update(dt):
   world.ClearForces()
 
   if keys[key.LEFT]:
-    board.linearVelocity = (-10, 0)
+    board.linearVelocity = (-20, 0)
   elif keys[key.RIGHT]:
-    board.linearVelocity = (10,0)
-  elif keys[key.Z]:
-    board.angularVelocity = 10
-  elif keys[key.X]:
-    board.angularVelocity = -10
+    board.linearVelocity = (20,0)
   else:
     board.linearVelocity = (0,0)
+  if keys[key.Z]:
+    board.angularVelocity = 5
+  elif keys[key.X]:
+    board.angularVelocity = -5
+  else:
     board.angularVelocity = 0
 
 @window.event
